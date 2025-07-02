@@ -87,7 +87,6 @@ public class WKConnection {
     public boolean isReConnecting = false;
     // 连接状态
     private int connectStatus;
-    private long lastMsgTime = 0;
     private String ip;
     private int port;
     public volatile INonBlockingConnection connection;
@@ -101,7 +100,6 @@ public class WKConnection {
     public volatile Handler reconnectionHandler = new Handler(Objects.requireNonNull(Looper.myLooper()));
     Runnable reconnectionRunnable = this::reconnection;
     private int connCount = 0;
-    private HeartbeatManager heartbeatManager;
     private NetworkChecker networkChecker;
 
     private final Handler checkRequestAddressHandler = new Handler(Looper.getMainLooper());
@@ -217,10 +215,18 @@ public class WKConnection {
     }
 
     private void startAll() {
-        heartbeatManager = new HeartbeatManager();
+        startHeartbeat();
         networkChecker = new NetworkChecker();
-        heartbeatManager.startHeartbeat();
         networkChecker.startNetworkCheck();
+    }
+
+    private void startHeartbeat() {
+        HeartbeatManager.getInstance().startHeartbeat();
+        HeartbeatManager.getInstance().setHeartBeatListener(reason -> {
+            if (connectionIsNull()) {
+                reconnection();
+            }
+        });
     }
 
     public synchronized void forcedReconnection() {
@@ -531,7 +537,7 @@ public class WKConnection {
                     @Override
                     public void pongMsg(WKPongMsg msgHeartbeat) {
                         // 心跳消息
-                        lastMsgTime = DateUtils.getInstance().getCurrentSeconds();
+                        HeartbeatManager.getInstance().onReceivePong();
                     }
 
                     @Override
@@ -697,10 +703,10 @@ public class WKConnection {
         };
     }
 
-    public void sendMessage(WKBaseMsg mBaseMsg) {
+    public int sendMessage(WKBaseMsg mBaseMsg) {
         if (mBaseMsg == null) {
             WKLoggerUtils.getInstance().w(TAG, "sendMessage called with null mBaseMsg.");
-            return;
+            return 0;
         }
 
         boolean locked = false;
@@ -708,18 +714,18 @@ public class WKConnection {
             locked = tryLockWithTimeout();
             if (!locked) {
                 WKLoggerUtils.getInstance().e(TAG, "获取锁超时，sendMessage失败");
-                return;
+                return 0;
             }
 
             if (mBaseMsg.packetType != WKMsgType.CONNECT) {
                 if (connectStatus == WKConnectStatus.syncMsg) {
                     WKLoggerUtils.getInstance().i(TAG, " sendMessage: In syncMsg status, message not sent: " + mBaseMsg.packetType);
-                    return;
+                    return 0;
                 }
                 if (connectStatus != WKConnectStatus.success) {
                     WKLoggerUtils.getInstance().w(TAG, " sendMessage: Not in success status (is " + connectStatus + "), attempting reconnection for: " + mBaseMsg.packetType);
                     reconnection();
-                    return;
+                    return 0;
                 }
             }
 
@@ -727,7 +733,7 @@ public class WKConnection {
             if (currentConnection == null || !currentConnection.isOpen()) {
                 WKLoggerUtils.getInstance().w(TAG, " sendMessage: Connection is null or not open, attempting reconnection for: " + mBaseMsg.packetType);
                 reconnection();
-                return;
+                return 0;
             }
 
             int status = MessageHandler.getInstance().sendMessage(currentConnection, mBaseMsg);
@@ -735,6 +741,7 @@ public class WKConnection {
                 WKLoggerUtils.getInstance().e(TAG, "发消息失败 (status 0 from MessageHandler), attempting reconnection for: " + mBaseMsg.packetType);
                 reconnection();
             }
+            return status;
         } finally {
             if (locked) {
                 connectionLock.unlock();
@@ -1006,7 +1013,6 @@ public class WKConnection {
             port = 0;
             requestIPTime = 0;
             connAckTime = 0;
-            lastMsgTime = 0;
             connCount = 0;
 
             // 清空发送消息队列
@@ -1128,5 +1134,9 @@ public class WKConnection {
             Thread.currentThread().interrupt();
             return false;
         }
+    }
+
+    public int getConnectionState() {
+        return connectStatus;
     }
 }

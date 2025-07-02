@@ -3,6 +3,10 @@ package com.xinbida.wukongim;
 import android.content.Context;
 import android.text.TextUtils;
 
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleEventObserver;
+import androidx.lifecycle.ProcessLifecycleOwner;
+
 import com.xinbida.wukongim.manager.CMDManager;
 import com.xinbida.wukongim.manager.ChannelManager;
 import com.xinbida.wukongim.manager.ChannelMembersManager;
@@ -12,6 +16,7 @@ import com.xinbida.wukongim.manager.MsgManager;
 import com.xinbida.wukongim.manager.ReminderManager;
 import com.xinbida.wukongim.manager.RobotManager;
 import com.xinbida.wukongim.message.MessageHandler;
+import com.xinbida.wukongim.message.timer.HeartbeatManager;
 import com.xinbida.wukongim.utils.CryptoUtils;
 
 /**
@@ -44,7 +49,7 @@ public class WKIM {
         return isWriteLog;
     }
 
-    public String getDeviceID(){
+    public String getDeviceID() {
         return deviceId;
     }
 
@@ -65,9 +70,11 @@ public class WKIM {
     public String getVersion() {
         return Version;
     }
-    public void setDeviceId(String deviceID){
+
+    public void setDeviceId(String deviceID) {
         this.deviceId = deviceID;
     }
+
     /**
      * 初始化IM
      *
@@ -92,6 +99,14 @@ public class WKIM {
         WKIMApplication.getInstance().getDbHelper();
         // 将上次发送消息中的队列标志为失败
         MessageHandler.getInstance().updateLastSendingMsgFail();
+        // 监听应用前后台切换
+        ProcessLifecycleOwner.get().getLifecycle().addObserver((LifecycleEventObserver) (lifecycleOwner, event) -> {
+            if (event == Lifecycle.Event.ON_RESUME) {
+                HeartbeatManager.getInstance().onAppBackgroundChanged(false);
+            } else if (event == Lifecycle.Event.ON_STOP) {
+                HeartbeatManager.getInstance().onAppBackgroundChanged(true);
+            }
+        });
     }
 
     // 获取消息管理

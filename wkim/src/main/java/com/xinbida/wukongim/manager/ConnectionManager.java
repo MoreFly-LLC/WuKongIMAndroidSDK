@@ -8,6 +8,7 @@ import com.xinbida.wukongim.interfaces.IConnectionStatus;
 import com.xinbida.wukongim.interfaces.IGetIpAndPort;
 import com.xinbida.wukongim.message.MessageHandler;
 import com.xinbida.wukongim.message.WKConnection;
+import com.xinbida.wukongim.message.timer.HeartbeatManager;
 import com.xinbida.wukongim.utils.WKLoggerUtils;
 
 import java.util.Map;
@@ -19,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ConnectionManager extends BaseManager {
     private final String TAG = "ConnectionManager";
+
     private ConnectionManager() {
 
     }
@@ -38,7 +40,7 @@ public class ConnectionManager extends BaseManager {
     // 连接
     public void connection() {
         if (TextUtils.isEmpty(WKIMApplication.getInstance().getToken()) || TextUtils.isEmpty(WKIMApplication.getInstance().getUid())) {
-            WKLoggerUtils.getInstance().e(TAG,"connection Uninitialized UID and token");
+            WKLoggerUtils.getInstance().e(TAG, "connection Uninitialized UID and token");
             return;
         }
         WKIMApplication.getInstance().isCanConnect = true;
@@ -69,7 +71,7 @@ public class ConnectionManager extends BaseManager {
      * 退出登录
      */
     private void logoutChat() {
-        WKLoggerUtils.getInstance().e(TAG,"exit");
+        WKLoggerUtils.getInstance().e(TAG, "exit");
         WKIMApplication.getInstance().isCanConnect = false;
         MessageHandler.getInstance().saveReceiveMsg();
 
@@ -88,7 +90,7 @@ public class ConnectionManager extends BaseManager {
         if (iGetIpAndPort != null) {
             runOnMainThread(() -> iGetIpAndPort.getIP((ip, port) -> iRequestIP.onResult(requestId, ip, port)));
         } else {
-            WKLoggerUtils.getInstance().e(TAG,"未注册获取连接地址的事件");
+            WKLoggerUtils.getInstance().e(TAG, "未注册获取连接地址的事件");
         }
     }
 
@@ -98,6 +100,7 @@ public class ConnectionManager extends BaseManager {
     }
 
     public void setConnectionStatus(int status, String reason) {
+        HeartbeatManager.getInstance().onConnectionStatusChange(status);
         if (connectionListenerMap != null && !connectionListenerMap.isEmpty()) {
             runOnMainThread(() -> {
                 for (Map.Entry<String, IConnectionStatus> entry : connectionListenerMap.entrySet()) {
