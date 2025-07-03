@@ -99,8 +99,9 @@ public class HeartbeatManager {
     }
 
     public void onAppBackgroundChanged(final boolean isBackground) {
-        getInstance().isBackground = isBackground;
+        this.isBackground = isBackground;
         int connectStatus = WKConnection.getInstance().getConnectionState();
+        WKLoggerUtils.getInstance().i(TAG, "onAppBackgroundChanged = " + isBackground + ",connectStatus=" + connectStatus);
         if (isBackground) {
             if (!WKConnectStatus.isSuccess(connectStatus)) {
                 this.heartBeatQueue.clear();

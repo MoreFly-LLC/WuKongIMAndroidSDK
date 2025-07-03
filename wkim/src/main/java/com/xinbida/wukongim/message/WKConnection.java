@@ -223,12 +223,11 @@ public class WKConnection {
     private void startHeartbeat() {
         HeartbeatManager.getInstance().startHeartbeat();
         HeartbeatManager.getInstance().setHeartBeatListener(reason -> {
+            WKLoggerUtils.getInstance().w(TAG, "HeartbeatManager.PingFailedReason=" + reason);
             if (reason == HeartbeatManager.PingFailedReason.SERVER_TIMEOUT || reason == HeartbeatManager.PingFailedReason.FIRST_PING_TIMEOUT || reason == HeartbeatManager.PingFailedReason.NO_CONNECTED_FIRST_FOREGROUND) {
                 connCount = 0;
             }
-            if (connectionIsNull()) {
-                reconnection();
-            }
+            reconnection();
         });
     }
 
