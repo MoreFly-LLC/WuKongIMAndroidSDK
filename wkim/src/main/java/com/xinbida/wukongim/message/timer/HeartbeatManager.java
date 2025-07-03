@@ -61,8 +61,8 @@ public class HeartbeatManager {
     }
 
     private void stopHeartbeat() {
-        TimerManager.getInstance().removeTask(TimerTasks.HEARTBEAT);
         WKLoggerUtils.getInstance().i(TAG, "stopHeartbeat");
+        TimerManager.getInstance().removeTask(TimerTasks.HEARTBEAT);
     }
 
     void sendPing() {
@@ -83,8 +83,8 @@ public class HeartbeatManager {
         }
     }
 
-    public void onConnectionStatusChange(final int status) {
-        if (status == WKConnectStatus.success) {
+    public void onConnectionStatusChange(final int connectStatus) {
+        if (WKConnectStatus.isSuccess(connectStatus)) {
             lastPongOrConnectedTime = SystemClock.elapsedRealtime();
             if (this.isBackground) {
                 this.stopHeartbeat();
@@ -100,19 +100,19 @@ public class HeartbeatManager {
 
     public void onAppBackgroundChanged(final boolean isBackground) {
         getInstance().isBackground = isBackground;
-        int currentStatus = WKConnection.getInstance().getConnectionState();
+        int connectStatus = WKConnection.getInstance().getConnectionState();
         if (isBackground) {
-            if (currentStatus != WKConnectStatus.success) {
+            if (!WKConnectStatus.isSuccess(connectStatus)) {
                 this.heartBeatQueue.clear();
             }
             this.stopHeartbeat();
         } else {
-            this.onForeground(currentStatus);
+            this.onForeground(connectStatus);
         }
     }
 
-    private void onForeground(int state) {
-        if (state == WKConnectStatus.success) {
+    private void onForeground(int connectStatus) {
+        if (WKConnectStatus.isSuccess(connectStatus)) {
             long diff = SystemClock.elapsedRealtime() - this.lastPongOrConnectedTime;
             if (diff >= SERVER_TIME_OUT) {
                 this.resetQueueAndReconnect(PingFailedReason.SERVER_TIMEOUT);

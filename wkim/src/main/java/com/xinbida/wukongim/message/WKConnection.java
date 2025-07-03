@@ -128,13 +128,13 @@ public class WKConnection {
         @Override
         public void run() {
             long nowTime = DateUtils.getInstance().getCurrentSeconds();
-            if (nowTime - connAckTime > connAckTimeoutTime && connectStatus != WKConnectStatus.success && connectStatus != WKConnectStatus.syncMsg) {
+            if (nowTime - connAckTime > connAckTimeoutTime && !WKConnectStatus.isSuccess(connectStatus)) {
                 WKLoggerUtils.getInstance().e(TAG, "连接确认超时");
                 isReConnecting = false;
                 closeConnect();
                 reconnection();
             } else {
-                if (connectStatus == WKConnectStatus.success || connectStatus == WKConnectStatus.syncMsg) {
+                if (WKConnectStatus.isSuccess(connectStatus)) {
                     WKLoggerUtils.getInstance().e(TAG, "连接确认成功");
                 } else {
                     WKLoggerUtils.getInstance().e(TAG, "等待连接确认--->" + (nowTime - connAckTime));
@@ -223,6 +223,9 @@ public class WKConnection {
     private void startHeartbeat() {
         HeartbeatManager.getInstance().startHeartbeat();
         HeartbeatManager.getInstance().setHeartBeatListener(reason -> {
+            if (reason == HeartbeatManager.PingFailedReason.SERVER_TIMEOUT || reason == HeartbeatManager.PingFailedReason.FIRST_PING_TIMEOUT || reason == HeartbeatManager.PingFailedReason.NO_CONNECTED_FIRST_FOREGROUND) {
+                connCount = 0;
+            }
             if (connectionIsNull()) {
                 reconnection();
             }

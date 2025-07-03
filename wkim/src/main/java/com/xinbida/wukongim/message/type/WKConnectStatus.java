@@ -19,4 +19,8 @@ public class WKConnectStatus {
     public static final int noNetwork = 5;
     // 同步完成
     public static final int syncCompleted = 6;
+
+    public static boolean isSuccess(int connectStatus) {
+        return connectStatus == success || connectStatus == syncMsg;
+    }
 }
