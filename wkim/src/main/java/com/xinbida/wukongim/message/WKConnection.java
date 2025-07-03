@@ -313,8 +313,6 @@ public class WKConnection {
         if (isHaveNetwork) {
             closeConnect();
             isReConnecting = true;
-            ip = "";
-            port = 0;
             requestIPTime = DateUtils.getInstance().getCurrentSeconds();
             getConnAddress();
         } else {
@@ -448,6 +446,8 @@ public class WKConnection {
                             iNonBlockingConnection.setFlushmode(IConnection.FlushMode.ASYNC);
                             iNonBlockingConnection.setAutoflush(true);
 
+                            WKLoggerUtils.getInstance().e(TAG, "connSocket connResult");
+
                             connectSuccess.set(true);
                             isReConnecting = false;
                             connCount = 0;
@@ -459,6 +459,7 @@ public class WKConnection {
                     });
 
                     // 创建新连接
+                    WKLoggerUtils.getInstance().i(TAG, "connSocket start" + " 连接地址：" + ip + ":" + port);
                     INonBlockingConnection newConnection = new NonBlockingConnection(ip, port, newClient);
                     newConnection.setAttachment(newSocketId);
 
