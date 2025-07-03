@@ -298,8 +298,6 @@ public class WKConnection {
             return;
         }
 
-        ip = "";
-        port = 0;
         if (isReConnecting) {
             long nowTime = DateUtils.getInstance().getCurrentSeconds();
             if (nowTime - requestIPTime > requestIPTimeoutTime) {
@@ -315,6 +313,8 @@ public class WKConnection {
         if (isHaveNetwork) {
             closeConnect();
             isReConnecting = true;
+            ip = "";
+            port = 0;
             requestIPTime = DateUtils.getInstance().getCurrentSeconds();
             getConnAddress();
         } else {
@@ -326,6 +326,7 @@ public class WKConnection {
     }
 
     private void getConnAddress() {
+        WKLoggerUtils.getInstance().i(TAG, "getConnAddress start");
         ExecutorService executor = getOrCreateExecutor();
         if (executor.isShutdown()) {
             WKLoggerUtils.getInstance().e(TAG, "线程池已关闭，重新初始化后重试");
@@ -384,6 +385,7 @@ public class WKConnection {
 
                     WKConnection.this.ip = ip;
                     WKConnection.this.port = port;
+                    WKLoggerUtils.getInstance().i(TAG, "getConnAddress end" + " 连接地址：" + ip + ":" + port);
                     if (connectionIsNull()) {
                         connSocket();
                     }
@@ -480,7 +482,7 @@ public class WKConnection {
                         sendConnectMsg();
                     }
                 } catch (Exception e) {
-                    WKLoggerUtils.getInstance().e(TAG, "连接异常: " + e.getMessage() + "连接地址：" + ip + ":" + port);
+                    WKLoggerUtils.getInstance().e(TAG, "连接异常: " + e.getMessage() + " 连接地址：" + ip + ":" + port);
                     if (!executor.isShutdown()) {
                         forcedReconnection();
                     }
@@ -1008,6 +1010,7 @@ public class WKConnection {
                 reconnectionHandler.removeCallbacks(reconnectionRunnable);
             }
 
+            WKLoggerUtils.getInstance().i(TAG, "stopAll");
             // 重置所有状态
             connectStatus = WKConnectStatus.fail;
             isReConnecting = false;
