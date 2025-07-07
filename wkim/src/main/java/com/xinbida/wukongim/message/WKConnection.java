@@ -96,7 +96,6 @@ public class WKConnection {
     private final long requestIPTimeoutTime = 6;
     private final long connAckTimeoutTime = 10;
     public String socketSingleID;
-    private String lastRequestId;
     public volatile Handler reconnectionHandler = new Handler(Objects.requireNonNull(Looper.myLooper()));
     Runnable reconnectionRunnable = this::reconnection;
     private int connCount = 0;
@@ -338,16 +337,16 @@ public class WKConnection {
                         return;
                     }
 
-                    final long startTime = System.currentTimeMillis();
-                    final long ADDRESS_TIMEOUT = 10000; // 10秒超时
-
                     WKIM.getInstance().getConnectionManager().setConnectionStatus(WKConnectStatus.connecting, WKConnectReason.Connecting);
-                    String currentRequestId = UUID.randomUUID().toString().replace("-", "");
-                    lastRequestId = currentRequestId;
+
+                    if (!TextUtils.isEmpty(ip) && port != 0 && connectionIsNull()) {
+                        connSocket();
+                    }
 
                     CountDownLatch addressLatch = new CountDownLatch(1);
                     AtomicReference<String> receivedIp = new AtomicReference<>();
                     AtomicInteger receivedPort = new AtomicInteger();
+                    String currentRequestId = UUID.randomUUID().toString().replace("-", "");
 
                     ConnectionManager.getInstance().getIpAndPort(currentRequestId, (requestId, ip, port) -> {
                         if (!currentRequestId.equals(requestId)) {
@@ -361,6 +360,7 @@ public class WKConnection {
                         addressLatch.countDown();
                     });
 
+                    final long ADDRESS_TIMEOUT = 10000; // 10秒超时
                     // 等待地址响应或超时
                     boolean gotAddress = addressLatch.await(ADDRESS_TIMEOUT, TimeUnit.MILLISECONDS);
                     if (!gotAddress) {
@@ -380,11 +380,13 @@ public class WKConnection {
                         return;
                     }
 
-                    WKConnection.this.ip = ip;
-                    WKConnection.this.port = port;
-                    WKLoggerUtils.getInstance().i(TAG, "getConnAddress end" + " 连接地址：" + ip + ":" + port);
-                    if (connectionIsNull()) {
-                        connSocket();
+                    if (!TextUtils.equals(WKConnection.this.ip, ip) || WKConnection.this.port != port) {
+                        WKConnection.this.ip = ip;
+                        WKConnection.this.port = port;
+                        WKLoggerUtils.getInstance().i(TAG, "getConnAddress end" + " 连接地址：" + ip + ":" + port);
+                        if (connectionIsNull()) {
+                            connSocket();
+                        }
                     }
                 } catch (Exception e) {
                     WKLoggerUtils.getInstance().e(TAG, "获取地址异常: " + e.getMessage());
