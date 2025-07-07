@@ -128,13 +128,13 @@ public class WKConnection {
         @Override
         public void run() {
             long nowTime = DateUtils.getInstance().getCurrentSeconds();
-            if (nowTime - connAckTime > connAckTimeoutTime && !WKConnectStatus.isSuccess(connectStatus)) {
+            if (nowTime - connAckTime > connAckTimeoutTime && connectStatus != WKConnectStatus.success && connectStatus != WKConnectStatus.syncMsg) {
                 WKLoggerUtils.getInstance().e(TAG, "连接确认超时");
                 isReConnecting = false;
                 closeConnect();
                 reconnection();
             } else {
-                if (WKConnectStatus.isSuccess(connectStatus)) {
+                if (connectStatus == WKConnectStatus.success || connectStatus == WKConnectStatus.syncMsg) {
                     WKLoggerUtils.getInstance().e(TAG, "连接确认成功");
                 } else {
                     WKLoggerUtils.getInstance().e(TAG, "等待连接确认--->" + (nowTime - connAckTime));
@@ -1140,9 +1140,5 @@ public class WKConnection {
             Thread.currentThread().interrupt();
             return false;
         }
-    }
-
-    public int getConnectionState() {
-        return connectStatus;
     }
 }

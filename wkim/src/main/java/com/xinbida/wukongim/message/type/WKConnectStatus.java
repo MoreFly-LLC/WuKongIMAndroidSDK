@@ -21,6 +21,10 @@ public class WKConnectStatus {
     public static final int syncCompleted = 6;
 
     public static boolean isSuccess(int connectStatus) {
-        return connectStatus == success || connectStatus == syncMsg;
+        return connectStatus == success;
+    }
+
+    public static boolean isFail(int connectStatus) {
+        return connectStatus == WKConnectStatus.fail || connectStatus == WKConnectStatus.connecting || connectStatus == WKConnectStatus.noNetwork || connectStatus == WKConnectStatus.kicked;
     }
 }

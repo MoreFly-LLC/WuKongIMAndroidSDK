@@ -4,8 +4,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 
+import com.xinbida.wukongim.WKIM;
 import com.xinbida.wukongim.message.WKConnection;
-import com.xinbida.wukongim.message.type.WKConnectStatus;
 import com.xinbida.wukongim.protocol.WKPingMsg;
 import com.xinbida.wukongim.utils.WKLoggerUtils;
 
@@ -83,8 +83,8 @@ public class HeartbeatManager {
         }
     }
 
-    public void onConnectionStatusChange(final int connectStatus) {
-        if (WKConnectStatus.isSuccess(connectStatus)) {
+    public void onConnectionStatusChange(final boolean isConnected) {
+        if (isConnected) {
             lastPongOrConnectedTime = SystemClock.elapsedRealtime();
             if (this.isBackground) {
                 this.stopHeartbeat();
@@ -100,20 +100,20 @@ public class HeartbeatManager {
 
     public void onAppBackgroundChanged(final boolean isBackground) {
         this.isBackground = isBackground;
-        int connectStatus = WKConnection.getInstance().getConnectionState();
-        WKLoggerUtils.getInstance().i(TAG, "onAppBackgroundChanged = " + isBackground + ",connectStatus=" + connectStatus);
+        boolean isConnected = WKIM.getInstance().getConnectionManager().isConnected();
+        WKLoggerUtils.getInstance().i(TAG, "onAppBackgroundChanged = " + isBackground + ",isConnected=" + isConnected);
         if (isBackground) {
-            if (!WKConnectStatus.isSuccess(connectStatus)) {
+            if (!isConnected) {
                 this.heartBeatQueue.clear();
             }
             this.stopHeartbeat();
         } else {
-            this.onForeground(connectStatus);
+            this.onForeground(isConnected);
         }
     }
 
-    private void onForeground(int connectStatus) {
-        if (WKConnectStatus.isSuccess(connectStatus)) {
+    private void onForeground(final boolean isConnected) {
+        if (isConnected) {
             long diff = SystemClock.elapsedRealtime() - this.lastPongOrConnectedTime;
             if (diff >= SERVER_TIME_OUT) {
                 this.resetQueueAndReconnect(PingFailedReason.SERVER_TIMEOUT);

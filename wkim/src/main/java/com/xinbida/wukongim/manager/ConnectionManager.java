@@ -9,6 +9,7 @@ import com.xinbida.wukongim.interfaces.IGetIpAndPort;
 import com.xinbida.wukongim.message.MessageHandler;
 import com.xinbida.wukongim.message.WKConnection;
 import com.xinbida.wukongim.message.timer.HeartbeatManager;
+import com.xinbida.wukongim.message.type.WKConnectStatus;
 import com.xinbida.wukongim.utils.WKLoggerUtils;
 
 import java.util.Map;
@@ -36,6 +37,7 @@ public class ConnectionManager extends BaseManager {
 
     private IGetIpAndPort iGetIpAndPort;
     private ConcurrentHashMap<String, IConnectionStatus> connectionListenerMap;
+    private boolean isConnected = false;
 
     // 连接
     public void connection() {
@@ -100,7 +102,13 @@ public class ConnectionManager extends BaseManager {
     }
 
     public void setConnectionStatus(int status, String reason) {
-        HeartbeatManager.getInstance().onConnectionStatusChange(status);
+        if (WKConnectStatus.isSuccess(status) && !isConnected) {
+            isConnected = true;
+            HeartbeatManager.getInstance().onConnectionStatusChange(true);
+        } else if (WKConnectStatus.isFail(status) && isConnected) {
+            isConnected = false;
+            HeartbeatManager.getInstance().onConnectionStatusChange(false);
+        }
         if (connectionListenerMap != null && !connectionListenerMap.isEmpty()) {
             runOnMainThread(() -> {
                 for (Map.Entry<String, IConnectionStatus> entry : connectionListenerMap.entrySet()) {
@@ -108,6 +116,10 @@ public class ConnectionManager extends BaseManager {
                 }
             });
         }
+    }
+
+    public boolean isConnected() {
+        return isConnected;
     }
 
     // 监听连接状态
