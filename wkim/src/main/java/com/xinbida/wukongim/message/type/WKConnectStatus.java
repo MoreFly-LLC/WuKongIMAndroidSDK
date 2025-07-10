@@ -11,20 +11,8 @@ public class WKConnectStatus {
     public static final int success = 1;
     //被踢（其他设备登录）
     public static final int kicked = 2;
-    //同步消息中
-    public static final int syncMsg = 3;
     //连接中
     public static final int connecting = 4;
     //无网络
     public static final int noNetwork = 5;
-    // 同步完成
-    public static final int syncCompleted = 6;
-
-    public static boolean isSuccess(int connectStatus) {
-        return connectStatus == success;
-    }
-
-    public static boolean isFail(int connectStatus) {
-        return connectStatus == WKConnectStatus.fail || connectStatus == WKConnectStatus.connecting || connectStatus == WKConnectStatus.noNetwork || connectStatus == WKConnectStatus.kicked;
-    }
 }

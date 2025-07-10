@@ -2,9 +2,7 @@ package com.xinbida.wukongim.manager;
 
 import android.content.ContentValues;
 import android.text.TextUtils;
-import android.util.Log;
 
-import com.xinbida.wukongim.WKIM;
 import com.xinbida.wukongim.WKIMApplication;
 import com.xinbida.wukongim.db.ConversationDbManager;
 import com.xinbida.wukongim.db.MsgDbManager;
@@ -24,7 +22,6 @@ import com.xinbida.wukongim.interfaces.IRefreshConversationMsg;
 import com.xinbida.wukongim.interfaces.IRefreshConversationMsgList;
 import com.xinbida.wukongim.interfaces.ISyncConversationChat;
 import com.xinbida.wukongim.interfaces.ISyncConversationChatBack;
-import com.xinbida.wukongim.message.type.WKConnectStatus;
 import com.xinbida.wukongim.message.type.WKMsgContentType;
 import com.xinbida.wukongim.utils.DispatchQueuePool;
 import com.xinbida.wukongim.utils.WKCommonUtils;
@@ -450,7 +447,6 @@ public class ConversationManager extends BaseManager {
                 WKLoggerUtils.getInstance().e(TAG, "saveSyncChat cmd not json struct");
             }
         }
-        WKIM.getInstance().getConnectionManager().setConnectionStatus(WKConnectStatus.syncCompleted, "");
         iSaveSyncChatBack.onBack();
     }
 }

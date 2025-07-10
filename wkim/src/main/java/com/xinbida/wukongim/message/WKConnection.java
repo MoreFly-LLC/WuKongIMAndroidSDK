@@ -127,13 +127,13 @@ public class WKConnection {
         @Override
         public void run() {
             long nowTime = DateUtils.getInstance().getCurrentSeconds();
-            if (nowTime - connAckTime > connAckTimeoutTime && connectStatus != WKConnectStatus.success && connectStatus != WKConnectStatus.syncMsg) {
+            if (nowTime - connAckTime > connAckTimeoutTime && connectStatus != WKConnectStatus.success) {
                 WKLoggerUtils.getInstance().e(TAG, "连接确认超时");
                 isReConnecting = false;
                 closeConnect();
                 reconnection();
             } else {
-                if (connectStatus == WKConnectStatus.success || connectStatus == WKConnectStatus.syncMsg) {
+                if (connectStatus == WKConnectStatus.success) {
                     WKLoggerUtils.getInstance().e(TAG, "连接确认成功");
                 } else {
                     WKLoggerUtils.getInstance().e(TAG, "等待连接确认--->" + (nowTime - connAckTime));
@@ -608,8 +608,7 @@ public class WKConnection {
             if (status == WKConnectStatus.success) {
                 connCount = 0;
                 isReConnecting = false;
-                connectStatus = WKConnectStatus.syncMsg;
-                WKIM.getInstance().getConnectionManager().setConnectionStatus(WKConnectStatus.syncMsg, WKConnectReason.SyncMsg);
+                WKIMApplication.getInstance().isCanConnect = true;
                 startAll();
 
                 if (WKIMApplication.getInstance().getSyncMsgMode() == WKSyncMsgMode.WRITE) {
@@ -623,12 +622,9 @@ public class WKConnection {
                                     return;
                                 }
                                 if (connection != null && !isClosing.get()) {
-                                    connectStatus = WKConnectStatus.success;
                                     MessageHandler.getInstance().saveReceiveMsg();
-                                    WKIMApplication.getInstance().isCanConnect = true;
                                     MessageHandler.getInstance().sendAck();
                                     resendMsg();
-                                    WKIM.getInstance().getConnectionManager().setConnectionStatus(WKConnectStatus.success, WKConnectReason.ConnectSuccess);
                                 }
                             } finally {
                                 if (innerLocked) {
@@ -647,8 +643,6 @@ public class WKConnection {
                                 return;
                             }
                             if (connection != null && !isClosing.get()) {
-                                connectStatus = WKConnectStatus.success;
-                                WKIMApplication.getInstance().isCanConnect = true;
                                 MessageHandler.getInstance().sendAck();
                                 resendMsg();
                                 WKIM.getInstance().getConnectionManager().setConnectionStatus(WKConnectStatus.success, WKConnectReason.ConnectSuccess);
@@ -693,12 +687,7 @@ public class WKConnection {
                             newState == WKConnectStatus.noNetwork;
             case WKConnectStatus.success ->
                 // From success, can move to syncMsg, kicked, or fail
-                    newState == WKConnectStatus.syncMsg ||
-                            newState == WKConnectStatus.kicked ||
-                            newState == WKConnectStatus.fail;
-            case WKConnectStatus.syncMsg ->
-                // From syncMsg, can move to success or fail
-                    newState == WKConnectStatus.success ||
+                    newState == WKConnectStatus.kicked ||
                             newState == WKConnectStatus.fail;
             case WKConnectStatus.noNetwork ->
                 // From noNetwork, can move to connecting or fail
@@ -725,10 +714,6 @@ public class WKConnection {
             }
 
             if (mBaseMsg.packetType != WKMsgType.CONNECT) {
-                if (connectStatus == WKConnectStatus.syncMsg) {
-                    WKLoggerUtils.getInstance().i(TAG, " sendMessage: In syncMsg status, message not sent: " + mBaseMsg.packetType);
-                    return 0;
-                }
                 if (connectStatus != WKConnectStatus.success) {
                     WKLoggerUtils.getInstance().w(TAG, " sendMessage: Not in success status (is " + connectStatus + "), attempting reconnection for: " + mBaseMsg.packetType);
                     reconnection();

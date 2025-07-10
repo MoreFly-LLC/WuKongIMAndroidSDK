@@ -2,7 +2,6 @@ package com.xinbida.wukongdemo
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -65,17 +64,10 @@ class ConversationActivity : AppCompatActivity() {
                     titleTv.setText(R.string.connect_success)
                 }
 
-                WKConnectStatus.syncMsg -> {
-                    titleTv.setText(R.string.connect_syncing)
-                }
-
                 WKConnectStatus.noNetwork -> {
                     titleTv.setText(R.string.no_net)
                 }
 
-                WKConnectStatus.syncCompleted -> {
-                    titleTv.setText(R.string.connect_success)
-                }
             }
         }
         // 监听刷新频道资料

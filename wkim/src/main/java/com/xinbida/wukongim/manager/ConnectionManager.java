@@ -102,10 +102,10 @@ public class ConnectionManager extends BaseManager {
     }
 
     public void setConnectionStatus(int status, String reason) {
-        if (WKConnectStatus.isSuccess(status) && !isConnected) {
+        if (status == WKConnectStatus.success && !isConnected) {
             isConnected = true;
             HeartbeatManager.getInstance().onConnectionStatusChange(true);
-        } else if (WKConnectStatus.isFail(status) && isConnected) {
+        } else if (status != WKConnectStatus.success && isConnected) {
             isConnected = false;
             HeartbeatManager.getInstance().onConnectionStatusChange(false);
         }
