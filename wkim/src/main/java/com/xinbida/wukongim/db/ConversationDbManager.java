@@ -429,6 +429,9 @@ public class ConversationDbManager {
 
     public WKConversationMsgExtra queryMsgExtraWithChannel(String channelID, byte channelType) {
         WKConversationMsgExtra msgExtra = null;
+        if (WKIMApplication.getInstance().getDbHelper() == null) {
+            return msgExtra;
+        }
         String selection = "channel_id=? and channel_type=?";
         Cursor cursor = WKIMApplication
                 .getInstance()
@@ -444,6 +447,9 @@ public class ConversationDbManager {
 
     private List<WKConversationMsgExtra> queryWithExtraChannelIds(List<String> channelIds) {
         List<WKConversationMsgExtra> list = new ArrayList<>();
+        if (WKIMApplication.getInstance().getDbHelper() == null) {
+            return list;
+        }
         try (Cursor cursor = WKIMApplication.getInstance().getDbHelper().select(conversationExtra, "channel_id in (" + WKCursor.getPlaceholders(channelIds.size()) + ")", channelIds.toArray(new String[0]), null)) {
             if (cursor == null) {
                 return list;
@@ -457,6 +463,9 @@ public class ConversationDbManager {
     }
 
     public synchronized boolean insertOrUpdateMsgExtra(WKConversationMsgExtra extra) {
+        if (WKIMApplication.getInstance().getDbHelper() == null) {
+            return false;
+        }
         WKConversationMsgExtra msgExtra = queryMsgExtraWithChannel(extra.channelID, extra.channelType);
         boolean isAdd = true;
         if (msgExtra != null) {
@@ -471,6 +480,9 @@ public class ConversationDbManager {
     }
 
     public synchronized void insertMsgExtras(List<WKConversationMsgExtra> list) {
+        if (WKIMApplication.getInstance().getDbHelper() == null) {
+            return;
+        }
         List<String> channelIds = new ArrayList<>();
         for (WKConversationMsgExtra extra : list) {
             boolean isAdd = true;

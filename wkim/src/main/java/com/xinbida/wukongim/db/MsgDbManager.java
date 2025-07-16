@@ -302,6 +302,9 @@ public class MsgDbManager {
 
     private List<WKMsg> queryMessages(String channelId, byte channelType, long oldestOrderSeq, boolean contain, int pullMode, int limit) {
         List<WKMsg> msgList = new ArrayList<>();
+        if (WKIMApplication.getInstance().getDbHelper() == null) {
+            return msgList;
+        }
         String sql;
         Object[] args;
         if (oldestOrderSeq <= 0) {
@@ -470,6 +473,9 @@ public class MsgDbManager {
             sql = "SELECT * FROM (SELECT " + messageCols + "," + extraCols + " FROM " + message + " LEFT JOIN " + messageExtra + " on " + message + ".message_id=" + messageExtra + ".message_id WHERE " + message + ".channel_id=? and " + message + ".channel_type=? and from_uid=? and " + message + ".type<>0 and " + message + ".type<>99 AND " + message + ".order_seq<?) where is_deleted=0 and revoke=0 order by order_seq desc limit 0," + limit;
         }
         List<WKMsg> wkMsgList = new ArrayList<>();
+        if (WKIMApplication.getInstance().getDbHelper() == null) {
+            return wkMsgList;
+        }
         try (Cursor cursor = WKIMApplication.getInstance().getDbHelper().rawQuery(sql, args)) {
             if (cursor == null) {
                 return wkMsgList;
