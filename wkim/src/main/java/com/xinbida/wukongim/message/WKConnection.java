@@ -645,7 +645,6 @@ public class WKConnection {
                             if (connection != null && !isClosing.get()) {
                                 MessageHandler.getInstance().sendAck();
                                 resendMsg();
-                                WKIM.getInstance().getConnectionManager().setConnectionStatus(WKConnectStatus.success, WKConnectReason.ConnectSuccess);
                             }
                         } finally {
                             if (innerLocked) {
