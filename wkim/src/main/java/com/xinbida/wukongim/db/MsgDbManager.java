@@ -799,6 +799,8 @@ public class MsgDbManager {
             if (cursor.moveToLast()) {
                 wkMsg = serializeMsg(cursor);
             }
+        } catch (Exception e) {
+            WKLoggerUtils.getInstance().e(TAG, "queryWithClientMsgNo error=" + e);
         }
         if (wkMsg != null)
             wkMsg.reactionList = MsgReactionDBManager.getInstance().queryWithMessageId(wkMsg.messageID);
