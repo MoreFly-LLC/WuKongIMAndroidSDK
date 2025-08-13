@@ -12,7 +12,7 @@ public class WKConnectStatus {
     //被踢（其他设备登录）
     public static final int kicked = 2;
     //连接中
-    public static final int connecting = 4;
+    public static final int connecting = 3;
     //无网络
-    public static final int noNetwork = 5;
+    public static final int noNetwork = 4;
 }

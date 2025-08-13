@@ -37,7 +37,7 @@ public class ConnectionManager extends BaseManager {
 
     private IGetIpAndPort iGetIpAndPort;
     private ConcurrentHashMap<String, IConnectionStatus> connectionListenerMap;
-    private boolean isConnected = false;
+    private int connectionStatus = -1;
 
     // 连接
     public void connection() {
@@ -102,13 +102,13 @@ public class ConnectionManager extends BaseManager {
     }
 
     public void setConnectionStatus(int status, String reason) {
-        if (status == WKConnectStatus.success && !isConnected) {
-            isConnected = true;
+        if (connectionStatus == status) return;
+        if (status == WKConnectStatus.success) {
             HeartbeatManager.getInstance().onConnectionStatusChange(true);
-        } else if (status != WKConnectStatus.success && isConnected) {
-            isConnected = false;
+        } else if (connectionStatus == WKConnectStatus.success) {
             HeartbeatManager.getInstance().onConnectionStatusChange(false);
         }
+        connectionStatus = status;
         if (connectionListenerMap != null && !connectionListenerMap.isEmpty()) {
             runOnMainThread(() -> {
                 for (Map.Entry<String, IConnectionStatus> entry : connectionListenerMap.entrySet()) {
@@ -119,7 +119,7 @@ public class ConnectionManager extends BaseManager {
     }
 
     public boolean isConnected() {
-        return isConnected;
+        return connectionStatus == WKConnectStatus.success;
     }
 
     // 监听连接状态
