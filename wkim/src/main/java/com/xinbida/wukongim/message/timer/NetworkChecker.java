@@ -1,7 +1,5 @@
 package com.xinbida.wukongim.message.timer;
 
-import android.util.Log;
-
 import com.xinbida.wukongim.WKIM;
 import com.xinbida.wukongim.WKIMApplication;
 import com.xinbida.wukongim.message.WKConnection;
@@ -32,7 +30,7 @@ public class NetworkChecker {
         if (!is_have_network) {
             isForcedReconnect = true;
             WKIM.getInstance().getConnectionManager().setConnectionStatus(WKConnectStatus.noNetwork, WKConnectReason.NoNetwork);
-            WKLoggerUtils.getInstance().e("无网络连接...");
+            WKLoggerUtils.getInstance().i("无网络连接...");
             WKConnection.getInstance().checkSendingMsg();
         } else {
             //有网络
