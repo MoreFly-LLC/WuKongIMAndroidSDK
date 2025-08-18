@@ -84,6 +84,13 @@ public class WKLoggerUtils {
         writeLog(message);
     }
 
+    public void i(String msg) {
+        if (WKIM.getInstance().isDebug()) {
+            info(TAG, msg);
+        }
+        WKLog.getInstance().i(TAG, msg);
+    }
+
     public void i(String tag, String msg) {
         if (WKIM.getInstance().isDebug()) {
             info(tag, msg);

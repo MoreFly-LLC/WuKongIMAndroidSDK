@@ -1,5 +1,7 @@
 package com.xinbida.wukongim.log;
 
+import androidx.annotation.NonNull;
+
 public class WKLog implements IWKLog {
 
     private static class WKLogBinder {
@@ -12,33 +14,33 @@ public class WKLog implements IWKLog {
 
     private IWKLog realPrinter = null;
 
-    void setCustomLogPrinter(IWKLog printer) {
+    public void setCustomLogPrinter(IWKLog printer) {
         realPrinter = printer;
     }
 
     @Override
-    public void d(String tag, String msg) {
+    public void d(@NonNull String tag, @NonNull String msg) {
         if (realPrinter != null) {
             realPrinter.d(tag, msg);
         }
     }
 
     @Override
-    public void i(String tag, String msg) {
+    public void i(@NonNull String tag, @NonNull String msg) {
         if (realPrinter != null) {
             realPrinter.i(tag, msg);
         }
     }
 
     @Override
-    public void w(String tag, String msg) {
+    public void w(@NonNull String tag, @NonNull String msg) {
         if (realPrinter != null) {
             realPrinter.w(tag, msg);
         }
     }
 
     @Override
-    public void e(String tag, String msg) {
+    public void e(@NonNull String tag, @NonNull String msg) {
         if (realPrinter != null) {
             realPrinter.e(tag, msg);
         }

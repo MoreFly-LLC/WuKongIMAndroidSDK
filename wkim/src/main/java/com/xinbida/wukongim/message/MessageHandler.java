@@ -40,8 +40,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 5/21/21 11:25 AM
@@ -254,7 +254,7 @@ public class MessageHandler {
                             break;
                     }
                     String info = "是否不持续化：" + no_persist + "，是否显示红点：" + red_dot + "，是否只同步一次：" + sync_once;
-                    WKLoggerUtils.getInstance().e(TAG, "收到包类型" + packetType + " " + packetTypeStr + "|" + info);
+                    WKLoggerUtils.getInstance().i(TAG, "收到包类型" + packetType + " " + packetTypeStr + "|" + info);
                 }
                 if (packetType == WKMsgType.REVACK || packetType == WKMsgType.SEND || packetType == WKMsgType.Reserved) {
                     WKConnection.getInstance().forcedReconnection();
@@ -263,7 +263,7 @@ public class MessageHandler {
                 if (packetType == WKMsgType.PONG) {
                     //心跳ack
                     mIReceivedMsgListener.pongMsg(new WKPongMsg());
-                    WKLoggerUtils.getInstance().e(TAG, "pong...");
+                    WKLoggerUtils.getInstance().i(TAG, "pong...");
                     byte[] bytes = Arrays.copyOfRange(lastMsgBytes, 1, lastMsgBytes.length);
                     cacheData = lastMsgBytes = bytes;
                 } else {

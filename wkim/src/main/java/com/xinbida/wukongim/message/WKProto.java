@@ -68,7 +68,7 @@ class WKProto {
         } else if (msg.packetType == WKMsgType.PING) {
             // 发送心跳
             bytes = WKProto.getInstance().enPingMsg((WKPingMsg) msg);
-            WKLoggerUtils.getInstance().e("ping...");
+            WKLoggerUtils.getInstance().i("ping...");
         }
         return bytes;
     }

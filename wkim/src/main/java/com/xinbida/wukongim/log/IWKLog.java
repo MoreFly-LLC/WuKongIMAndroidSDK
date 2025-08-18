@@ -1,13 +1,15 @@
 package com.xinbida.wukongim.log;
 
+import androidx.annotation.NonNull;
+
 public interface IWKLog {
 
-    void d(String tag, String msg);
+    void d(@NonNull String tag, @NonNull String msg);
 
-    void i(String tag, String msg);
+    void i(@NonNull String tag, @NonNull String msg);
 
-    void w(String tag, String msg);
+    void w(@NonNull String tag, @NonNull String msg);
 
-    void e(String tag, String msg);
+    void e(@NonNull String tag, @NonNull String msg);
 
 }
