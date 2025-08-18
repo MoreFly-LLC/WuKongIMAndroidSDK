@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.xinbida.wukongim.WKIM;
 import com.xinbida.wukongim.WKIMApplication;
+import com.xinbida.wukongim.log.WKLog;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -24,10 +25,8 @@ public class WKLoggerUtils {
      * log TAG
      */
     private final String TAG = "WKLogger" + WKIM.getInstance().getVersion();
-    //Environment.getExternalStorageDirectory().getAbsolutePath() + "/";
     private final String FILE_NAME = "wkLogger_" + WKIM.getInstance().getVersion() + ".log";
 
-    //
     private String getLogFilePath() {
         final String ROOT = Objects.requireNonNull(WKIMApplication.getInstance().getContext().getExternalFilesDir(null)).getAbsolutePath() + "/";
         return ROOT + FILE_NAME;
@@ -81,105 +80,15 @@ public class WKLoggerUtils {
      */
     private void info(String tag, String msg) {
         String message = createMessage(msg);
-        if (WKIM.getInstance().isDebug()) {
-            Log.i(TAG + " " + tag, message);
-        }
-        if (WKIM.getInstance().isDebug()) {
-            writeLog(message);
-        }
+        Log.i(TAG + " " + tag, message);
+        writeLog(message);
     }
 
     public void i(String tag, String msg) {
-        info(tag, msg);
-    }
-
-    public void i(String tag, Exception e) {
-        info(tag, e != null ? e.toString() : "null");
-    }
-
-    /**
-     * log.v
-     */
-    private void verbose(String msg) {
-        String message = createMessage(msg);
         if (WKIM.getInstance().isDebug()) {
-            Log.v(TAG, message);
+            info(tag, msg);
         }
-        if (WKIM.getInstance().isDebug()) {
-            writeLog(message);
-        }
-    }
-
-    public void v(String msg) {
-        if (WKIM.getInstance().isDebug()) {
-            verbose(msg);
-        }
-        if (WKIM.getInstance().isDebug()) {
-            writeLog(msg);
-        }
-    }
-
-    public void v(Exception e) {
-        if (WKIM.getInstance().isDebug()) {
-            verbose(e != null ? e.toString() : "null");
-        }
-        if (WKIM.getInstance().isDebug()) {
-            writeLog(e.toString());
-        }
-    }
-
-    /**
-     * log.d
-     */
-    private void debug(String msg) {
-        if (WKIM.getInstance().isDebug()) {
-            String message = createMessage(msg);
-            Log.d(TAG, message);
-        }
-        if (WKIM.getInstance().isDebug()) {
-            writeLog(msg);
-        }
-    }
-
-    /**
-     * log.e
-     */
-    public void error(String tag, String msg) {
-        String message = createMessage(msg);
-        if (WKIM.getInstance().isDebug()) {
-            Log.e(TAG + " " + tag, message);
-        }
-        if (WKIM.getInstance().isDebug()) {
-            writeLog(message);
-        }
-    }
-
-    /**
-     * log.error
-     */
-    public void error(Exception e) {
-        StringBuilder sb = new StringBuilder();
-        String name = getFunctionName();
-        StackTraceElement[] sts = e.getStackTrace();
-
-        if (name != null) {
-            sb.append(name).append(" - ").append(e).append("\r\n");
-        } else {
-            sb.append(e).append("\r\n");
-        }
-        if (sts.length > 0) {
-            for (StackTraceElement st : sts) {
-                if (st != null) {
-                    sb.append("[ ").append(st.getFileName()).append(":").append(st.getLineNumber()).append(" ]\r\n");
-                }
-            }
-        }
-        if (WKIM.getInstance().isDebug()) {
-            Log.e(TAG, sb.toString());
-        }
-        if (WKIM.getInstance().isDebug()) {
-            writeLog(sb.toString());
-        }
+        WKLog.getInstance().i(TAG + " " + tag, msg);
     }
 
     /**
@@ -187,58 +96,42 @@ public class WKLoggerUtils {
      */
     private void warn(String tag, String msg) {
         String message = createMessage(msg);
-        if (WKIM.getInstance().isDebug()) {
-            System.out.println(message);
-        } else {
-            Log.w(TAG + " " + tag, message);
-        }
-        if (WKIM.getInstance().isDebug()) {
-            writeLog(message);
-        }
-    }
-
-    public void d(String msg) {
-        debug(msg);
-
-    }
-
-    public void d(Exception e) {
-        debug(e != null ? e.toString() : "null");
-    }
-
-
-    public void e(String msg) {
-        error("", msg);
-    }
-
-    public void e(String tag, String msg) {
-        error(tag, msg);
-    }
-
-    public void e(Exception e) {
-        error(e);
+        Log.w(TAG + " " + tag, message);
+        writeLog(message);
     }
 
     /**
      * log.w
      */
     public void w(String tag, String msg) {
-        warn(tag, msg);
+        if (WKIM.getInstance().isDebug()) {
+            warn(tag, msg);
+        }
+        WKLog.getInstance().w(TAG + " " + tag, msg);
     }
 
-    public void w(String tag,Exception e) {
-        warn(tag,e != null ? e.toString() : "null");
+    /**
+     * log.e
+     */
+    private void error(String tag, String msg) {
+        String message = createMessage(msg);
+        Log.e(TAG + " " + tag, message);
+        writeLog(message);
     }
-//
-//    public  void resetLogFile() {
-//        File file = new File(logFile);
-//        file.delete();
-//        try {
-//            file.createNewFile();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
+
+    public void e(String msg) {
+        if (WKIM.getInstance().isDebug()) {
+            error("", msg);
+        }
+        WKLog.getInstance().e(TAG, msg);
+    }
+
+    public void e(String tag, String msg) {
+        if (WKIM.getInstance().isDebug()) {
+            error(tag, msg);
+        }
+        WKLog.getInstance().e(TAG + " " + tag, msg);
+    }
 
     @SuppressLint("SimpleDateFormat")
     private void writeLog(String content) {
@@ -250,12 +143,9 @@ public class WKLoggerUtils {
             if (!file.exists()) {
                 file.createNewFile();
             }
-//			DateFormat formate = SimpleDateFormat.getDateTimeInstance();
-            SimpleDateFormat formate = new SimpleDateFormat(
-                    "yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            SimpleDateFormat formate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
             FileWriter write = new FileWriter(file, true);
-            write.write(formate.format(new Date()) + "   " +
-                    content + "\n");
+            write.write(formate.format(new Date()) + "   " + content + "\n");
             write.flush();
             write.close();
         } catch (IOException e) {
