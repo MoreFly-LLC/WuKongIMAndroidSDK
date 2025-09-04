@@ -243,7 +243,7 @@ class WKProto {
                 return null;
             }
             receivedMsg.payload = CryptoUtils.getInstance().aesDecrypt(CryptoUtils.getInstance().base64Decode(content));
-            WKLoggerUtils.getInstance().e(receivedMsg.toString());
+            WKLoggerUtils.getInstance().i(receivedMsg.toString());
             return receivedMsg;
         } catch (IOException e) {
             WKLoggerUtils.getInstance().e(TAG, "解码收到的消息错误");
